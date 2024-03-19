@@ -18,6 +18,7 @@ def create_user(**params):
     """Create a new user"""
     return get_user_model().objects.create_user(**params)
 
+
 class PublicUserAPITest(TestCase):
     """Test a public features of the user API"""
     def setUp(self) -> None:
@@ -26,9 +27,9 @@ class PublicUserAPITest(TestCase):
     def test_user_create_user_success(self):
         """Test creating a user is successful"""
         payload = {
-            'email':'test@example.com',
-            'password':'testpass123',
-            'name':'test Name',
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'test Name',
         }
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -38,11 +39,11 @@ class PublicUserAPITest(TestCase):
         self.assertNotIn('password', res.data)
 
     def test_user_with_email_exist_error(self):
-        """Test error returned if user is already exist with same email address"""
+        """Test error returned if user already exist with same email address"""
         payload = {
-            'email':'test@example.com',
-            'password':'testpass123',
-            'name':'test Name'
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'test Name'
         }
         create_user(**payload)
         res = self.client.post(CREATE_USER_URL, payload)
@@ -52,9 +53,9 @@ class PublicUserAPITest(TestCase):
     def test_password_too_short_error(self):
         """Test an error when password is too short(less than 5 characters)"""
         payload = {
-            'email':'test@example.com',
-            'password':'pw',
-            'name':'test Name'
+            'email': 'test@example.com',
+            'password': 'pw',
+            'name': 'test Name'
         }
 
         res = self.client.post(CREATE_USER_URL, payload)
@@ -64,17 +65,16 @@ class PublicUserAPITest(TestCase):
         ).exists()
         self.assertFalse(user_exists)
 
-
     def test_create_token_for_user(self):
         """Test generates token for valid credentials"""
         user_details = {
-            'email':'test@example.com',
-            'password':'testpass123',
-            'name':'test Name'
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'test Name'
         }
         payload = {
-            'email':user_details['email'],
-            'password':user_details['password'],
+            'email': user_details['email'],
+            'password': user_details['password'],
         }
         get_user_model().objects.create_user(**user_details)
         res = self.client.post(TOKEN_URL, payload)
@@ -84,7 +84,7 @@ class PublicUserAPITest(TestCase):
     def test_create_token_bad_credentials(self):
         """Test returning error if credentials are invalid"""
         create_user(email='test@example.com', password='goodpass')
-        payload = {'email':'test@example.com', 'password':'badpass'}
+        payload = {'email': 'test@example.com', 'password': 'badpass'}
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', res.data)
@@ -98,13 +98,14 @@ def test_retrieve_user_authorized(self):
 
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+
 class PrivateUserAPITest(TestCase):
     """Test API requests that require authetication"""
     def setUp(self):
         self.user = create_user(
-            email = 'test@example.com',
-            password = 'testpas1234',
-            name = 'Test User'
+            email='test@example.com',
+            password='testpas1234',
+            name='Test User'
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -114,8 +115,8 @@ class PrivateUserAPITest(TestCase):
         res = self.client.get(ME_URL)
         self.assertEqual(res.status, status.HTTP_200_OK)
         self.assertEqual(res.data, {
-            'name':self.user.name,
-            'email':self.user.email,
+            'name': self.user.name,
+            'email': self.user.email,
         })
 
     def test_post_me_not_allowed(self):
